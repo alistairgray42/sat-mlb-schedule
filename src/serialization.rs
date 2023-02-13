@@ -1,6 +1,6 @@
 // so this is really not something that should exist, but for whatever reason z3
-// doesn't compile if z3 is in the Cargo.toml? sounds like a skill issue tbh but
-// also not really that complicated to manually patch
+// doesn't compile if serde is in the Cargo.toml? sounds like a skill issue tbh
+// but also not really that complicated to manually patch
 
 // dubious assumption made for the sake of simplicity: series are in the same
 // order when serialized and deserialized. this allows us to
@@ -19,41 +19,29 @@ use crate::definitions::{
     variables::SATVariables,
 };
 
-pub fn serialize(
-    file: &mut File,
-    first_half_model: Model,
-    second_half_model: Model,
-    series: Vec<Series>,
-    first_half_vars: SATVariables,
-    second_half_vars: SATVariables,
-) {
-    for series in series {
-        let slot: u8 = if first_half_vars.slots_of_series_starts.contains_key(&series) {
-            let &var_idx = first_half_vars.slots_of_series_starts.get(&series).unwrap();
-            let var = first_half_vars.int_vars.get(var_idx).unwrap();
+pub fn serialization_slots(model: &Model, series: &Vec<Series>, vars: &SATVariables) -> Vec<u8> {
+    series
+        .iter()
+        .map(|series| {
+            let &var_idx = vars.slots_of_series_starts.get(&series).unwrap();
+            let var = vars.int_vars.get(var_idx).unwrap();
 
-            first_half_model
+            model
                 .eval(var, false)
                 .unwrap()
                 .as_i64()
                 .unwrap()
                 .try_into()
                 .unwrap()
-        } else {
-            let &var_idx = second_half_vars
-                .slots_of_series_starts
-                .get(&series)
-                .unwrap();
-            let var = second_half_vars.int_vars.get(var_idx).unwrap();
+        })
+        .collect::<Vec<u8>>()
+}
 
-            second_half_model
-                .eval(var, false)
-                .unwrap()
-                .as_i64()
-                .unwrap()
-                .try_into()
-                .unwrap()
-        };
+pub fn serialize(file: &mut File, first_half_slots: Vec<u8>, second_half_slots: Vec<u8>) {
+    let mut slots = first_half_slots.clone();
+    slots.extend(second_half_slots);
+
+    for slot in slots {
         file.write(&[slot]).expect("Couldn't write to file!");
     }
 }
