@@ -1,0 +1,8 @@
+[package]
+name = "sat-mlb-schedule"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+lazy_static = "1.4.0"
+z3 = "0.11"
