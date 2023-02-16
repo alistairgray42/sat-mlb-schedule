@@ -22,7 +22,7 @@ pub fn assert_all_constraints<'a>(
     first_half: bool,
 ) {
     assert_basic_constraints(context, solver, vars, series, teams, first_half);
-    // assert_adjacency_constraints(context, solver, vars, series, first_half);
+    assert_adjacency_constraints(context, solver, vars, series, first_half);
     // assert_distributional_constraints(context, solver, vars, series);
     // assert_special_dates_constraints(context, solver, vars, series);
 }
