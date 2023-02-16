@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs::File, io::Write, thread};
+use std::{collections::HashMap, fs::File, io::Write, thread, time::Instant};
 
 use definitions::series::Series;
 use serialization::deserialize;
@@ -113,7 +113,15 @@ fn pretty_print(schedule: HashMap<Series, i32>) {
 }
 
 fn main() {
+    let begin_time = Instant::now();
     generate_and_serialize();
+    let end_time = Instant::now();
+
+    println!(
+        "Time to generate and serialize: {:?}",
+        end_time - begin_time
+    );
+
     let schedule = deserialize_schedule();
     pretty_print(schedule);
 }
