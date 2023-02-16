@@ -6,9 +6,9 @@ use crate::definitions::{
     team::Team,
 };
 
-use super::teamwise_schedule::TeamWiseSchedule;
+use super::super::teamwise_schedule::TeamWiseSchedule;
 
-pub fn homestand_roadtrip_length_badness(schedule: &TeamWiseSchedule) -> HashMap<Team, f32> {
+pub fn homestand_roadtrip_length_badness(schedule: &TeamWiseSchedule) -> f32 {
     let mut m: HashMap<Team, HashMap<SeriesSlot, Series>> = HashMap::new();
     for (&(team, slot), &series) in schedule.iter() {
         if !m.contains_key(&team) {
@@ -18,14 +18,13 @@ pub fn homestand_roadtrip_length_badness(schedule: &TeamWiseSchedule) -> HashMap
         m.get_mut(&team).unwrap().insert(slot, series);
     }
 
-    HashMap::from_iter(
-        m.iter().map(|(&team, schedule)| {
-            (team, homestand_roadtrip_length_badness_team(team, schedule))
-        }),
-    )
+    m.iter()
+        .map(|(&team, schedule)| homestand_roadtrip_length_badness_team(team, schedule))
+        .reduce(|acc, elem| acc + elem)
+        .unwrap()
 }
 
-pub fn homestand_roadtrip_length_badness_team(
+fn homestand_roadtrip_length_badness_team(
     team: Team,
     schedule: &HashMap<SeriesSlot, Series>,
 ) -> f32 {
@@ -91,16 +90,4 @@ pub fn homestand_roadtrip_length_badness_team(
     }
 
     total
-}
-
-pub fn roadtrip_distance_traveled_badness(schedule: &TeamWiseSchedule) -> f32 {
-    0.0
-}
-
-pub fn identical_opponents_too_close_badness(schedule: &TeamWiseSchedule) -> f32 {
-    0.0
-}
-
-pub fn divisional_opponents_too_close_badness(schedule: &TeamWiseSchedule) -> f32 {
-    0.0
 }
