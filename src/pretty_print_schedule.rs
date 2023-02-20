@@ -6,7 +6,7 @@ use crate::definitions::{
     team::TEAMS,
 };
 
-pub fn pretty_print_schedule(series_to_slot: HashMap<Series, i32>) -> Vec<String> {
+pub fn pretty_print_schedule(series_to_slot: &HashMap<Series, i32>) -> Vec<String> {
     let mut lines = vec![];
 
     let series: Vec<&Series> = series_to_slot.keys().collect();

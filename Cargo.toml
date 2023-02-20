@@ -6,4 +6,5 @@ edition = "2021"
 [dependencies]
 lazy_static = "1.4.0"
 z3 = { git = "https://github.com/prove-rs/z3.rs" }
+rand = "0.8.5"
 # z3 = "0.11"

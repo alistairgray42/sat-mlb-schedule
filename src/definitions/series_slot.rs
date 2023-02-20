@@ -9,6 +9,8 @@ pub const FIRST_SERIES_SLOT: SeriesSlot = 0;
 pub const ALL_STAR_SERIES_SLOT: SeriesSlot = 29; // based on observation of previous seasons
 pub const LAST_SERIES_SLOT: SeriesSlot = 52;
 
+pub const NUM_SLOTS: i32 = 53;
+
 pub fn is_weekend_series(slot: &SeriesSlot) -> bool {
     slot % 2 == 0
 }

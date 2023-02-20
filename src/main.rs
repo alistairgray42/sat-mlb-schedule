@@ -7,6 +7,7 @@ use z3::{Config, Context, Solver};
 use crate::{
     constraints::assert_all_constraints,
     definitions::{team::TEAMS, variables::SATVariables},
+    optimizer::{badness::badness, try_some_perturbations},
     pretty_print_schedule::pretty_print_schedule,
     serialization::{serialization_slots, serialize},
     series::generate_all_series,
@@ -101,8 +102,8 @@ fn deserialize_schedule() -> HashMap<Series, i32> {
     deserialize(&mut serialized_file, all_series)
 }
 
-fn pretty_print(schedule: HashMap<Series, i32>) {
-    let lines = pretty_print_schedule(schedule);
+fn pretty_print(schedule: &HashMap<Series, i32>) {
+    let lines = pretty_print_schedule(&schedule);
 
     let mut schedule_file = File::create("schedule_pretty").expect("Couldn't open file!");
     for line in lines {
@@ -113,6 +114,7 @@ fn pretty_print(schedule: HashMap<Series, i32>) {
 }
 
 fn main() {
+    /*
     let begin_time = Instant::now();
     generate_and_serialize();
     let end_time = Instant::now();
@@ -121,7 +123,8 @@ fn main() {
         "Time to generate and serialize: {:?}",
         end_time - begin_time
     );
+    */
 
-    let schedule = deserialize_schedule();
-    pretty_print(schedule);
+    let schedule = try_some_perturbations(&deserialize_schedule());
+    pretty_print(&schedule);
 }
