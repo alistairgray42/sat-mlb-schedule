@@ -75,48 +75,88 @@ fn schedule_array_to_hashmap(schedule: ScheduleArray) -> HashMap<Series, i32> {
     map
 }
 
+fn maybe_perturb_two_rows(
+    schedule: ScheduleArray,
+    badness_score: f32,
+) -> Option<(ScheduleArray, f32, usize, usize)> {
+    for row_1 in 0..51 {
+        for row_2 in (row_1 + 1)..52 {
+            let mut schedule_copy = schedule.clone();
+
+            let tmp = schedule_copy[row_1];
+            schedule_copy[row_1] = schedule_copy[row_2];
+            schedule_copy[row_2] = tmp;
+
+            let score = badness(&schedule_copy);
+
+            if score < badness_score {
+                return Some((schedule_copy, score, row_1, row_2));
+            }
+        }
+    }
+    return None;
+}
+
+fn maybe_perturb_three_rows(
+    schedule: ScheduleArray,
+    badness_score: f32,
+) -> Option<(ScheduleArray, f32, usize, usize, usize)> {
+    for row_1 in 0..50 {
+        for row_2 in (row_1 + 1)..51 {
+            for row_3 in (row_2 + 1)..52 {
+                let mut schedule_copy = schedule.clone();
+
+                let tmp = schedule_copy[row_1];
+                schedule_copy[row_1] = schedule_copy[row_2];
+                schedule_copy[row_2] = schedule_copy[row_3];
+                schedule_copy[row_3] = tmp;
+
+                let score = badness(&schedule_copy);
+
+                if score < badness_score {
+                    return Some((schedule_copy, score, row_1, row_2, row_3));
+                }
+            }
+        }
+    }
+    return None;
+}
+
 pub fn try_some_perturbations(initial_schedule: &HashMap<Series, i32>) -> HashMap<Series, i32> {
     // Get the schedule into tabular form for easier manipulation
     let mut schedule = schedule_hashmap_to_array(initial_schedule);
     let mut badness_score = badness(&schedule);
 
-    let mut local_optimum = false;
     let mut iteration_num = 0;
 
-    while !local_optimum {
-        let mut break_to_next_iteration = false;
-
+    loop {
         iteration_num += 1;
 
-        for row_1 in 0..51 {
-            for row_2 in (row_1 + 1)..52 {
-                let mut schedule_copy = schedule.clone();
+        let two_row_result = maybe_perturb_two_rows(schedule, badness_score);
+        if two_row_result.is_some() {
+            let row_1;
+            let row_2;
+            let old_score = badness_score;
 
-                let tmp = schedule_copy[row_1];
-                schedule_copy[row_1] = schedule_copy[row_2];
-                schedule_copy[row_2] = tmp;
-
-                let score = badness(&schedule_copy);
-
-                if score < badness_score {
-                    println!(
-                        "[{iteration_num}]: replaced ({row_1}, {row_2}); {score} < {badness_score}"
-                    );
-                    schedule = schedule_copy;
-                    badness_score = score;
-
-                    break_to_next_iteration = true;
-                    break;
-                }
-            }
-
-            if break_to_next_iteration {
-                break;
-            }
+            ((schedule, badness_score, row_1, row_2)) = two_row_result.unwrap();
+            println!(
+                "[{iteration_num}]: replaced ({row_1}, {row_2}); {old_score} < {badness_score}"
+            );
         }
 
-        if !break_to_next_iteration {
-            local_optimum = true;
+        let three_row_result = maybe_perturb_three_rows(schedule, badness_score);
+        if three_row_result.is_some() {
+            let row_1;
+            let row_2;
+            let row_3;
+            let old_score = badness_score;
+
+            ((schedule, badness_score, row_1, row_2, row_3)) = three_row_result.unwrap();
+            println!("[{iteration_num}]: cycled ({row_1} <- {row_2} <- {row_3}); {old_score} < {badness_score}");
+        }
+
+        if two_row_result.is_none() && three_row_result.is_none() {
+            break;
         }
     }
 
