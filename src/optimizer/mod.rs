@@ -10,7 +10,9 @@ use crate::definitions::{
 pub mod badness;
 mod teamwise_schedule;
 
-fn schedule_hashmap_to_array(schedule: &HashMap<Series, i32>) -> [[Series; 15]; 52] {
+pub type ScheduleArray = [[Series; 15]; 52];
+
+fn schedule_hashmap_to_array(schedule: &HashMap<Series, i32>) -> ScheduleArray {
     let mut slot_to_series = [[None; 15]; NUM_SLOTS as usize];
     let mut last_col_used = [0; NUM_SLOTS as usize];
 
@@ -56,7 +58,7 @@ fn schedule_hashmap_to_array(schedule: &HashMap<Series, i32>) -> [[Series; 15]; 
         .unwrap()
 }
 
-fn schedule_array_to_hashmap(schedule: [[Series; 15]; 52]) -> HashMap<Series, i32> {
+fn schedule_array_to_hashmap(schedule: ScheduleArray) -> HashMap<Series, i32> {
     let mut map = HashMap::<Series, i32>::new();
 
     for row in 0..52 {
@@ -75,8 +77,8 @@ fn schedule_array_to_hashmap(schedule: [[Series; 15]; 52]) -> HashMap<Series, i3
 
 pub fn try_some_perturbations(initial_schedule: &HashMap<Series, i32>) -> HashMap<Series, i32> {
     // Get the schedule into tabular form for easier manipulation
-    let mut badness_score = badness(initial_schedule);
     let mut schedule = schedule_hashmap_to_array(initial_schedule);
+    let mut badness_score = badness(&schedule);
 
     let mut local_optimum = false;
     let mut iteration_num = 0;
@@ -94,7 +96,7 @@ pub fn try_some_perturbations(initial_schedule: &HashMap<Series, i32>) -> HashMa
                 schedule_copy[row_1] = schedule_copy[row_2];
                 schedule_copy[row_2] = tmp;
 
-                let score = badness(&schedule_array_to_hashmap(schedule_copy));
+                let score = badness(&schedule_copy);
 
                 if score < badness_score {
                     println!(

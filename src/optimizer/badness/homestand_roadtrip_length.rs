@@ -1,21 +1,38 @@
 use std::collections::HashMap;
 
-use crate::definitions::{
-    series::Series,
-    series_slot::{SeriesSlot, ALL_STAR_SERIES_SLOT, FIRST_SERIES_SLOT, LAST_SERIES_SLOT},
-    team::Team,
+use crate::{
+    definitions::{
+        series::Series,
+        series_slot::{SeriesSlot, ALL_STAR_SERIES_SLOT, FIRST_SERIES_SLOT, LAST_SERIES_SLOT},
+        team::Team,
+    },
+    optimizer::ScheduleArray,
 };
 
-use super::super::teamwise_schedule::TeamWiseSchedule;
-
-pub fn homestand_roadtrip_length_badness(schedule: &TeamWiseSchedule) -> f32 {
+pub fn homestand_roadtrip_length_badness(schedule: &ScheduleArray) -> f32 {
     let mut m: HashMap<Team, HashMap<SeriesSlot, Series>> = HashMap::new();
-    for (&(team, slot), &series) in schedule.iter() {
-        if !m.contains_key(&team) {
-            m.insert(team, HashMap::new());
-        }
+    for (slot, series_in_slot) in schedule.iter().enumerate() {
+        let final_slot = if (slot as i32) < ALL_STAR_SERIES_SLOT {
+            slot
+        } else {
+            slot + 1
+        } as i32;
 
-        m.get_mut(&team).unwrap().insert(slot, series);
+        for &series in series_in_slot.iter() {
+            if !m.contains_key(&series.home_team) {
+                m.insert(series.home_team, HashMap::new());
+            }
+            if !m.contains_key(&series.away_team) {
+                m.insert(series.away_team, HashMap::new());
+            }
+
+            m.get_mut(&series.home_team)
+                .unwrap()
+                .insert(final_slot, series);
+            m.get_mut(&series.away_team)
+                .unwrap()
+                .insert(final_slot, series);
+        }
     }
 
     m.iter()

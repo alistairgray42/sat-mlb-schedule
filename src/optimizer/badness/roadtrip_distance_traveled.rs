@@ -1,5 +1,5 @@
-use super::super::teamwise_schedule::TeamWiseSchedule;
+use crate::optimizer::ScheduleArray;
 
-pub fn roadtrip_distance_traveled_badness(schedule: &TeamWiseSchedule) -> f32 {
+pub fn roadtrip_distance_traveled_badness(schedule: &ScheduleArray) -> f32 {
     0.0
 }

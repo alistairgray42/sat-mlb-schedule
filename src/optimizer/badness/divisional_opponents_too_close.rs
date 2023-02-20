@@ -1,5 +1,5 @@
-use super::super::teamwise_schedule::TeamWiseSchedule;
+use crate::optimizer::ScheduleArray;
 
-pub fn divisional_opponents_too_close_badness(schedule: &TeamWiseSchedule) -> f32 {
+pub fn divisional_opponents_too_close_badness(schedule: &ScheduleArray) -> f32 {
     0.0
 }
